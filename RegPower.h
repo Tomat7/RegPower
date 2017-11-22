@@ -31,8 +31,8 @@ public:
 	uint16_t Pset;
 	//int boost_lag = BOOST_LAG;            // Коэффициент интеграции в расчете угла
 	uint16_t ZCount;
-	unsigned long __Isumm;
-	unsigned int __cntr;
+	//unsigned long __Isumm;
+	//unsigned int __cntr;
 
 	void init(uint16_t Pmax);
 	// ============= Расчет угла открытия триака
@@ -50,7 +50,7 @@ protected:
 	volatile static bool _zero;
 	volatile static int _cntr;
 	volatile static unsigned long _Isumm;
-	volatile static uint16_t _zcc;
+	//volatile static uint16_t _zcc;
 
 };
 extern RegPower TEH;

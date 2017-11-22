@@ -29,7 +29,7 @@ public:
 	float Iset = 0;   		// установленный ток
 	uint16_t Pnow;
 	uint16_t Pset;
-	int boost_lag = BOOST_LAG;            // Коэффициент интеграции в расчете угла
+	//int boost_lag = BOOST_LAG;            // Коэффициент интеграции в расчете угла
 	uint16_t ZCount;
 	unsigned long __Isumm;
 	unsigned int __cntr;

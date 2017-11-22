@@ -74,7 +74,7 @@ void RegPower::control()
 	}
 	if (Iset)
 	{ // Расчет угла открытия триака
-		angle += (Inow - Iset)  / boost_lag;
+		angle += (Inow - Iset)  / BOOST_LAG;
 		angle = constrain(angle, ZEROOFFSET, C_TIMER);
 	} else angle = C_TIMER;
 	OCR1A = int(angle);

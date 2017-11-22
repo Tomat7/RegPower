@@ -14,10 +14,10 @@
 #define C_TIMER 625-ZEROOFFSET          // Максимальное количество срабатываний таймера за полупериод синусоиды
 #define ACS_RATIO 0.048828125 // Коэффициент датчика ACS712 |5А - 0.024414063 | 20А - 0.048828125 | 30A - 0.073242188 |
 #define RESIST_ADDR 0                  // адрес в eeprom для хранения сопротивления нагрузки
-#define AVG_FACTOR 5
 #define ZCROSS 3
 #define TRIAC PORTD5	// пока не проверялось! возможно дальше порт прямо указан в программе!
-#define BOOST_LAG 300
+#define BOOST_LAG 300  // work with this to get small jitter 
+#define AVG_FACTOR 5   // also work with this to get small jitter
 
 class RegPower
 {

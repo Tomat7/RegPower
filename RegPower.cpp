@@ -27,9 +27,7 @@ volatile uint16_t RegPower::_zcc;
 ISR(TIMER1_COMPA_vect) {
 	RegPower::SetTriac_int();
 	//if (TCNT1 < C_TIMER) PORTD |= (1 << TRIAC);
-	//PORTD &= ~(1 << TRIAC);	
-	//Serial.print("+");
-	// установит "1" на выводе D5 - триак откроется
+	//PORTD &= ~(1 << TRIAC) - установит "1" на выводе D5 - триак откроется
 }
 
 //================= Обработка прерывания АЦП для расчета среднеквадратичного тока
@@ -63,8 +61,8 @@ void RegPower::init(uint16_t Pmax) //__attribute__((always_inline))
 
 void RegPower::control()
 {
-	__cntr = _cntr;
-	__Isumm = _Isumm;
+	//__cntr = _cntr;
+	//__Isumm = _Isumm;
 	if (_zero && _cntr == 1024)
 	{
 		_Isumm >>= 10;
@@ -79,7 +77,7 @@ void RegPower::control()
 	} else angle = C_TIMER;
 	OCR1A = int(angle);
 	Pnow = (uint16_t)(pow(Inow, 2) * resist);
-	ZCount = _zcc;
+	//ZCount = _zcc;
 	return;
 }
 
@@ -106,7 +104,7 @@ void RegPower::ZeroCross_int() //__attribute__((always_inline))
 	TCNT1 = 0;
 	PORTD &= ~(1 << TRIAC); // установит "0" на выводе D5 - триак закроется
 	_zero = true;
-	_zcc++;
+	//_zcc++;
 	//Serial.println("*");
 }
 

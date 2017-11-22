@@ -19,7 +19,7 @@ RegPower TEH;              // preinstatiate
 volatile bool RegPower::_zero;
 volatile int RegPower::_cntr;
 volatile unsigned long RegPower::_Isumm;
-volatile uint16_t RegPower::_zcc;
+//volatile uint16_t RegPower::_zcc;
 
 //=== Обработка прерывания по совпадению OCR1A (угла открытия) и счетчика TCNT1 
 // (который сбрасывается в "0" по zero_crosss_int) 

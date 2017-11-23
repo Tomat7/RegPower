@@ -19,6 +19,7 @@ RegPower TEH;              // preinstatiate
 volatile bool RegPower::_zero;
 volatile int RegPower::_cntr;
 volatile unsigned long RegPower::_Isumm;
+volatile float RegPower::_angle;
 //volatile uint16_t RegPower::_zcc;
 
 //=== Обработка прерывания по совпадению OCR1A (угла открытия) и счетчика TCNT1 
@@ -55,8 +56,9 @@ void RegPower::init(uint16_t Pmax) //__attribute__((always_inline))
 	TIMSK1 |= (1 << OCIE1A);     // Разрешить прерывание по совпадению
 	attachInterrupt(1, ZeroCross_int, RISING);//вызов прерывания при детектировании нуля
 	resist = ( (220*220.01) / Pmax );
-	Serial.println(resist);
 	_zero = false;
+	Serial.print(F(LIBVERSION));
+	Serial.println(resist);
 }
 
 void RegPower::control()
@@ -72,20 +74,22 @@ void RegPower::control()
 	}
 	if (Iset)
 	{ // Расчет угла открытия триака
-		angle += (Inow - Iset)  / BOOST_LAG;
-		angle = constrain(angle, ZEROOFFSET, C_TIMER);
-	} else angle = C_TIMER;
-	OCR1A = int(angle);
+		_angle += (Inow - Iset)  / BOOST_LAG;
+		_angle = constrain(_angle, ZEROOFFSET, C_TIMER);
+	} else _angle = C_TIMER;
+	//OCR1A = int(angle);
 	Pnow = (uint16_t)(pow(Inow, 2) * resist);
 	//ZCount = _zcc;
 	return;
 }
 
+/*
 int RegPower::getpower()
 {	
 	//Power = (uint16_t)(pow(Inow, 2) * resist);
 	return Pnow;
 }
+*/
 /*
 int RegPower::setpower()
 {	
@@ -104,6 +108,7 @@ void RegPower::ZeroCross_int() //__attribute__((always_inline))
 	TCNT1 = 0;
 	PORTD &= ~(1 << TRIAC); // установит "0" на выводе D5 - триак закроется
 	_zero = true;
+	OCR1A = int(_angle);
 	//_zcc++;
 	//Serial.println("*");
 }

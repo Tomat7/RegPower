@@ -19,7 +19,8 @@ RegPower TEH;              // preinstatiate
 volatile bool RegPower::_zero;
 volatile int RegPower::_cntr;
 volatile unsigned long RegPower::_Isumm;
-volatile uint16_t RegPower::_zcc;
+volatile float RegPower::_angle;
+//volatile uint16_t RegPower::_zcc;
 
 //=== Обработка прерывания по совпадению OCR1A (угла открытия) и счетчика TCNT1 
 // (который сбрасывается в "0" по zero_crosss_int) 
@@ -27,9 +28,7 @@ volatile uint16_t RegPower::_zcc;
 ISR(TIMER1_COMPA_vect) {
 	RegPower::SetTriac_int();
 	//if (TCNT1 < C_TIMER) PORTD |= (1 << TRIAC);
-	//PORTD &= ~(1 << TRIAC);	
-	//Serial.print("+");
-	// установит "1" на выводе D5 - триак откроется
+	//PORTD &= ~(1 << TRIAC) - установит "1" на выводе D5 - триак откроется
 }
 
 //================= Обработка прерывания АЦП для расчета среднеквадратичного тока
@@ -57,14 +56,15 @@ void RegPower::init(uint16_t Pmax) //__attribute__((always_inline))
 	TIMSK1 |= (1 << OCIE1A);     // Разрешить прерывание по совпадению
 	attachInterrupt(1, ZeroCross_int, RISING);//вызов прерывания при детектировании нуля
 	resist = ( (220*220.01) / Pmax );
-	Serial.println(resist);
 	_zero = false;
+	Serial.print(F(LIBVERSION));
+	Serial.println(resist);
 }
 
 void RegPower::control()
 {
-	__cntr = _cntr;
-	__Isumm = _Isumm;
+	//__cntr = _cntr;
+	//__Isumm = _Isumm;
 	if (_zero && _cntr == 1024)
 	{
 		_Isumm >>= 10;
@@ -74,20 +74,22 @@ void RegPower::control()
 	}
 	if (Iset)
 	{ // Расчет угла открытия триака
-		angle += (Inow - Iset)  / boost_lag;
-		angle = constrain(angle, ZEROOFFSET, C_TIMER);
-	} else angle = C_TIMER;
-	OCR1A = int(angle);
+		_angle += (Inow - Iset)  / BOOST_LAG;
+		_angle = constrain(_angle, ZEROOFFSET, C_TIMER);
+	} else _angle = C_TIMER;
+	//OCR1A = int(angle);
 	Pnow = (uint16_t)(pow(Inow, 2) * resist);
-	ZCount = _zcc;
+	//ZCount = _zcc;
 	return;
 }
 
+/*
 int RegPower::getpower()
 {	
 	//Power = (uint16_t)(pow(Inow, 2) * resist);
 	return Pnow;
 }
+*/
 /*
 int RegPower::setpower()
 {	
@@ -106,7 +108,8 @@ void RegPower::ZeroCross_int() //__attribute__((always_inline))
 	TCNT1 = 0;
 	PORTD &= ~(1 << TRIAC); // установит "0" на выводе D5 - триак закроется
 	_zero = true;
-	_zcc++;
+	OCR1A = int(_angle);
+	//_zcc++;
 	//Serial.println("*");
 }
 

@@ -10,25 +10,16 @@
 
 RegPower TEH;              // preinstatiate
 
-//unsigned short TimerOne::pwmPeriod = 0;
-//unsigned char TimerOne::clockSelectBits = 0;
-//void (*TimerOne::isrCallback)() = NULL;
-//unsigned int RegPower::cntr = 0;
-// interrupt service routine that wraps a user defined function supplied by attachInterrupt
-
 volatile bool RegPower::_zero;
 volatile int RegPower::_cntr;
 volatile unsigned long RegPower::_Isumm;
 volatile float RegPower::_angle;
-//volatile uint16_t RegPower::_zcc;
 
 //=== Обработка прерывания по совпадению OCR1A (угла открытия) и счетчика TCNT1 
 // (который сбрасывается в "0" по zero_crosss_int) 
 
 ISR(TIMER1_COMPA_vect) {
 	RegPower::SetTriac_int();
-	//if (TCNT1 < C_TIMER) PORTD |= (1 << TRIAC);
-	//PORTD &= ~(1 << TRIAC) - установит "1" на выводе D5 - триак откроется
 }
 
 //================= Обработка прерывания АЦП для расчета среднеквадратичного тока
@@ -63,39 +54,24 @@ void RegPower::init(uint16_t Pmax) //__attribute__((always_inline))
 
 void RegPower::control()
 {
-	//__cntr = _cntr;
-	//__Isumm = _Isumm;
 	if (_zero && _cntr == 1024)
 	{
 		_Isumm >>= 10;
 		Inow = (Inow * (AVG_FACTOR - 1) + ((_Isumm > 2) ? sqrt(_Isumm) * ACS_RATIO : 0)) / AVG_FACTOR;
 		_zero = false;
 		_Isumm = _cntr = 0;                 // обнуляем суммы токов и счетчики
+		Pnow = (uint16_t)(pow(Inow, 2) * resist);
+		
+		if (Iset)
+		{ // Расчет угла открытия триака
+			_angle += (Inow - Iset)  / LAG_FACTOR;
+			_angle = constrain(_angle, ZEROOFFSET, C_TIMER);
+		} else _angle = C_TIMER;
+		//OCR1A = int(angle);
 	}
-	if (Iset)
-	{ // Расчет угла открытия триака
-		_angle += (Inow - Iset)  / BOOST_LAG;
-		_angle = constrain(_angle, ZEROOFFSET, C_TIMER);
-	} else _angle = C_TIMER;
-	//OCR1A = int(angle);
-	Pnow = (uint16_t)(pow(Inow, 2) * resist);
-	//ZCount = _zcc;
 	return;
 }
 
-/*
-int RegPower::getpower()
-{	
-	//Power = (uint16_t)(pow(Inow, 2) * resist);
-	return Pnow;
-}
-*/
-/*
-int RegPower::setpower()
-{	
-	return Pset;
-}
-*/
 void RegPower::setpower(int setPower)
 {	
 	Pset = setPower;
@@ -109,7 +85,6 @@ void RegPower::ZeroCross_int() //__attribute__((always_inline))
 	PORTD &= ~(1 << TRIAC); // установит "0" на выводе D5 - триак закроется
 	_zero = true;
 	OCR1A = int(_angle);
-	//_zcc++;
 	//Serial.println("*");
 }
 
@@ -130,5 +105,6 @@ void RegPower::GetI_int() //__attribute__((always_inline))
 void RegPower::SetTriac_int() //__attribute__((always_inline))
 {
 	if (TCNT1 < C_TIMER) PORTD |= (1 << TRIAC);
-	//PORTD &= ~(1 << TRIAC);
+	//PORTD |= (1 << TRIAC);  - установит "1" и откроет триак
+	//PORTD &= ~(1 << TRIAC); - установит "0" и закроет триак
 }

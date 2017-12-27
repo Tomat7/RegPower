@@ -3,6 +3,8 @@ Arduino Hi-Power regulator for AC devices
 
 __Warning! Hi voltage is dangerous! Be careful!__
 =================================================
+__Внимание! Высокое напряжение опасно для жизни! Будьте осторожны!__
+=================================================
 
 ZeroCross detector on D3.
 Triac on D5.
